@@ -105,6 +105,17 @@ nistkat/PQCgenKAT_kem1024: $(SOURCES_ASCON) $(HEADERS_ASCON) nistkat/PQCgenKAT_k
 	$(CC) $(NISTFLAGS) $(ASCON_CFLAGS) -DKYBER_K=4 -o $@ $(SOURCES_ASCON) nistkat/rng.c nistkat/PQCgenKAT_kem.c $(LDFLAGS) -lcrypto
 
 
+# ---- NTT TIMING ----
+
+test/test_ntt_timing512: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_ntt_timing.c randombytes.c test/cpucycles.c
+	$(CC) $(CFLAGS) -I. $(ASCON_CFLAGS) -DKYBER_K=2 $(SOURCES_ASCON) randombytes.c test/cpucycles.c test/test_ntt_timing.c -o $@
+
+test/test_ntt_timing768: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_ntt_timing.c randombytes.c test/cpucycles.c
+	$(CC) $(CFLAGS) -I. $(ASCON_CFLAGS) -DKYBER_K=3 $(SOURCES_ASCON) randombytes.c test/cpucycles.c test/test_ntt_timing.c -o $@
+
+test/test_ntt_timing1024: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_ntt_timing.c randombytes.c test/cpucycles.c
+	$(CC) $(CFLAGS) -I. $(ASCON_CFLAGS) -DKYBER_K=4 $(SOURCES_ASCON) randombytes.c test/cpucycles.c test/test_ntt_timing.c -o $@
+
 clean:
 	-$(RM) -f *.gcno *.gcda *.lcov *.o *.so
 	-$(RM) -f test/test_kyber512 test/test_kyber768 test/test_kyber1024
