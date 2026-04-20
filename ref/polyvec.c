@@ -2,6 +2,9 @@
 #include "params.h"
 #include "poly.h"
 #include "polyvec.h"
+#include "benchlog.h"
+#include "test/cpucycles.h"
+#include "kyber_hw.h"
 
 /*************************************************
 * Name:        polyvec_compress
@@ -199,8 +202,10 @@ void polyvec_invntt_tomont(polyvec *r)
 *            - const polyvec *a: pointer to first input vector of polynomials
 *            - const polyvec *b: pointer to second input vector of polynomials
 **************************************************/
+
 void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
-{
+{  
+  uint64_t s = cpucycles();
   unsigned int i;
   poly t;
 
@@ -211,6 +216,7 @@ void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
   }
 
   poly_reduce(r);
+  bench_add_poly_mul(cpucycles() - s);
 }
 
 /*************************************************

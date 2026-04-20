@@ -6,6 +6,7 @@
 #include "cbd.h"
 #include "symmetric.h"
 #include "verify.h"
+#include "kyber_hw.h"
 
 /*************************************************
 * Name:        poly_compress
@@ -258,10 +259,9 @@ void poly_getnoise_eta2(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t non
 *
 * Arguments:   - uint16_t *r: pointer to in/output polynomial
 **************************************************/
-void poly_ntt(poly *r)
+void poly_ntt(poly *a) 
 {
-  ntt(r->coeffs);
-  poly_reduce(r);
+  kyber_ntt_hw(a->coeffs);
 }
 
 /*************************************************
@@ -273,9 +273,9 @@ void poly_ntt(poly *r)
 *
 * Arguments:   - uint16_t *a: pointer to in/output polynomial
 **************************************************/
-void poly_invntt_tomont(poly *r)
+void poly_invntt_tomont(poly *a) 
 {
-  invntt(r->coeffs);
+  kyber_invntt_hw(a->coeffs);
 }
 
 /*************************************************

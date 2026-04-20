@@ -7,6 +7,8 @@
 #include "verify.h"
 #include "symmetric.h"
 #include "randombytes.h"
+#include "benchlog.h"
+#include "test/cpucycles.h"
 /*************************************************
 * Name:        crypto_kem_keypair_derand
 *
@@ -114,9 +116,14 @@ int crypto_kem_enc(uint8_t *ct,
                    uint8_t *ss,
                    const uint8_t *pk)
 {
+  uint64_t t0 = cpucycles();
+  bench_reset();
+
   uint8_t coins[KYBER_SYMBYTES];
   randombytes(coins, KYBER_SYMBYTES);
   crypto_kem_enc_derand(ct, ss, pk, coins);
+
+  bench_add_encaps(cpucycles() - t0);
   return 0;
 }
 
@@ -141,30 +148,30 @@ int crypto_kem_dec(uint8_t *ss,
                    const uint8_t *ct,
                    const uint8_t *sk)
 {
+  uint64_t t0 = cpucycles();
+  bench_reset();
+
   int fail;
   uint8_t buf[2*KYBER_SYMBYTES];
-  /* Will contain key, coins */
   uint8_t kr[2*KYBER_SYMBYTES];
-//  uint8_t cmp[KYBER_CIPHERTEXTBYTES+KYBER_SYMBYTES];
   uint8_t cmp[KYBER_CIPHERTEXTBYTES];
   const uint8_t *pk = sk+KYBER_INDCPA_SECRETKEYBYTES;
 
   indcpa_dec(buf, ct, sk);
 
-  /* Multitarget countermeasure for coins + contributory KEM */
-  memcpy(buf+KYBER_SYMBYTES, sk+KYBER_SECRETKEYBYTES-2*KYBER_SYMBYTES, KYBER_SYMBYTES);
+  memcpy(buf+KYBER_SYMBYTES,
+         sk+KYBER_SECRETKEYBYTES-2*KYBER_SYMBYTES,
+         KYBER_SYMBYTES);
   hash_g(kr, buf, 2*KYBER_SYMBYTES);
 
-  /* coins are in kr+KYBER_SYMBYTES */
   indcpa_enc(cmp, buf, pk, kr+KYBER_SYMBYTES);
 
   fail = verify(ct, cmp, KYBER_CIPHERTEXTBYTES);
 
-  /* Compute rejection key */
-  rkprf(ss,sk+KYBER_SECRETKEYBYTES-KYBER_SYMBYTES,ct);
+  rkprf(ss, sk+KYBER_SECRETKEYBYTES-KYBER_SYMBYTES, ct);
 
-  /* Copy true key to return buffer if fail is false */
-  cmov(ss,kr,KYBER_SYMBYTES,!fail);
+  cmov(ss, kr, KYBER_SYMBYTES, !fail);
 
+  bench_add_decaps(cpucycles() - t0);
   return 0;
 }

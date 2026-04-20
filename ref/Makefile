@@ -14,7 +14,7 @@ ASCON_CFLAGS := -I$(ASCON_DIR) -I$(ASCON_DIR)/tests -I$(ASCON_CXOF_DIR)
 ASCON_SOURCES := $(wildcard $(ASCON_CXOF_DIR)/*.c)
 
 # Kyber sources when using Ascon backend
-SOURCES_ASCON = $(SOURCES) symmetric-ascon.c $(ASCON_SOURCES)
+SOURCES_ASCON = $(SOURCES) symmetric-ascon.c kyber_hw.c benchlog.c $(ASCON_SOURCES)
 HEADERS_ASCON = $(HEADERS)
 
 .PHONY: all test speed shared nistkat clean
@@ -115,6 +115,18 @@ test/test_ntt_timing768: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_ntt_timing.
 
 test/test_ntt_timing1024: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_ntt_timing.c randombytes.c test/cpucycles.c
 	$(CC) $(CFLAGS) -I. $(ASCON_CFLAGS) -DKYBER_K=4 $(SOURCES_ASCON) randombytes.c test/cpucycles.c test/test_ntt_timing.c -o $@
+
+
+# ---- SUMMARY ----
+
+test/test_bench_summary512: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_bench_summary.c randombytes.c test/cpucycles.c
+	$(CC) $(CFLAGS) -I. $(ASCON_CFLAGS) -DKYBER_K=2 $(SOURCES_ASCON) randombytes.c test/cpucycles.c test/test_bench_summary.c -o $@
+	
+test/test_bench_summary768: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_bench_summary.c randombytes.c test/cpucycles.c benchlog.c
+	$(CC) $(CFLAGS) -I. $(ASCON_CFLAGS) -DKYBER_K=3 $(SOURCES_ASCON) randombytes.c test/cpucycles.c test/test_bench_summary.c -o $@
+
+test/test_bench_summary1024: $(SOURCES_ASCON) $(HEADERS_ASCON) test/test_bench_summary.c randombytes.c test/cpucycles.c benchlog.c
+	$(CC) $(CFLAGS) -I. $(ASCON_CFLAGS) -DKYBER_K=4 $(SOURCES_ASCON) randombytes.c test/cpucycles.c test/test_bench_summary.c -o $@
 
 clean:
 	-$(RM) -f *.gcno *.gcda *.lcov *.o *.so

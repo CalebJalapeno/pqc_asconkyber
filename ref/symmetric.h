@@ -12,7 +12,7 @@
 #define XOF_BLOCKBYTES 168
 
 typedef struct {
-  uint8_t in[KYBER_SYMBYTES + 2]; // seed || x || y
+  uint8_t in[1 + KYBER_SYMBYTES + 2]; // seed || x || y
   size_t  inlen;
   size_t  offset;                // bytes already squeezed
 } xof_state;
